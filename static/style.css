@@ -1,0 +1,170 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f0f4f8;
+  color: #1a202c;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  background: linear-gradient(135deg, #2b6cb0, #4299e1);
+  color: white;
+  padding: 24px 40px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.header-inner { display: flex; align-items: center; gap: 16px; max-width: 960px; margin: 0 auto; }
+.logo { font-size: 2.5rem; }
+header h1 { font-size: 1.6rem; font-weight: 700; }
+header p  { font-size: 0.9rem; opacity: 0.85; margin-top: 2px; }
+
+/* Main */
+main { flex: 1; max-width: 960px; margin: 32px auto; padding: 0 20px; width: 100%; }
+
+.section {
+  background: white;
+  border-radius: 12px;
+  padding: 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+}
+.section h2 { font-size: 1.15rem; font-weight: 600; margin-bottom: 18px; color: #2d3748; }
+
+/* Description */
+.description p { color: #4a5568; line-height: 1.7; font-size: 0.95rem; }
+
+/* Accuracy Cards */
+.cards { display: flex; flex-direction: column; gap: 12px; }
+.card { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 8px; transition: background 0.2s; }
+.card.best-model { background: #ebf8ff; border: 1.5px solid #90cdf4; }
+.card-name { width: 210px; font-size: 0.88rem; color: #4a5568; flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
+.best-badge { background: #2b6cb0; color: white; font-size: 0.7rem; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+.bar-wrap { flex: 1; background: #e2e8f0; border-radius: 99px; height: 10px; overflow: hidden; }
+.bar { height: 100%; background: linear-gradient(90deg, #4299e1, #2b6cb0); border-radius: 99px; }
+.card-acc { width: 48px; text-align: right; font-weight: 600; font-size: 0.88rem; color: #2b6cb0; }
+.best-note { margin-top: 16px; font-size: 0.9rem; color: #2b6cb0; background: #ebf8ff; padding: 10px 14px; border-radius: 8px; border-left: 4px solid #4299e1; }
+
+/* Graphs */
+.graphs { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+.graph-item { text-align: center; }
+.graph-item img { width: 100%; border-radius: 8px; border: 1px solid #e2e8f0; }
+.graph-item p { font-size: 0.78rem; color: #718096; margin-top: 6px; }
+
+/* Form */
+.form-desc { font-size: 0.9rem; color: #718096; margin-bottom: 20px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group label { font-size: 0.88rem; font-weight: 500; color: #4a5568; }
+.form-group label span { font-weight: 400; color: #a0aec0; }
+.form-group input,
+.form-group select {
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+  outline: none;
+}
+.form-group input:focus,
+.form-group select:focus { border-color: #4299e1; }
+.form-group input.invalid,
+.form-group select.invalid { border-color: #fc8181; }
+.err { font-size: 0.78rem; color: #e53e3e; min-height: 16px; }
+
+button[type="submit"] {
+  background: linear-gradient(135deg, #2b6cb0, #4299e1);
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+button[type="submit"]:hover  { opacity: 0.9; transform: translateY(-1px); }
+button[type="submit"]:active { transform: translateY(0); }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Results */
+.results { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.result-card {
+  border-radius: 10px;
+  padding: 16px 12px;
+  text-align: center;
+  border: 2px solid #e2e8f0;
+  background: #f7fafc;
+  position: relative;
+}
+.result-card.best-result { box-shadow: 0 0 0 3px #4299e1; }
+.result-model { font-size: 0.78rem; color: #718096; margin-bottom: 4px; }
+.result-acc   { font-size: 0.75rem; color: #a0aec0; margin-bottom: 8px; }
+.result-pred  { font-size: 1.1rem; font-weight: 700; }
+
+.result-card.high   { border-color: #48bb78; background: #f0fff4; }
+.result-card.high   .result-pred { color: #276749; }
+.result-card.medium { border-color: #ed8936; background: #fffaf0; }
+.result-card.medium .result-pred { color: #9c4221; }
+.result-card.low    { border-color: #fc8181; background: #fff5f5; }
+.result-card.low    .result-pred { color: #9b2c2c; }
+
+/* Final Prediction */
+.final-prediction {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  background: #f7fafc;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.final-label { font-size: 0.85rem; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; }
+.final-value { font-size: 2rem; font-weight: 800; }
+.final-note  { font-size: 0.8rem; color: #a0aec0; }
+
+.final-prediction.high   { border-color: #48bb78; background: #f0fff4; }
+.final-prediction.high   .final-value { color: #276749; }
+.final-prediction.medium { border-color: #ed8936; background: #fffaf0; }
+.final-prediction.medium .final-value { color: #9c4221; }
+.final-prediction.low    { border-color: #fc8181; background: #fff5f5; }
+.final-prediction.low    .final-value { color: #9b2c2c; }
+
+/* Download */
+.download-btn {
+  display: block;
+  margin: 0 auto;
+  background: #edf2f7;
+  color: #2d3748;
+  border: 1.5px solid #e2e8f0;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.download-btn:hover { background: #e2e8f0; }
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 24px 20px;
+  font-size: 0.82rem;
+  color: #718096;
+  border-top: 1px solid #e2e8f0;
+  background: white;
+  line-height: 1.9;
+}
+footer strong { color: #2d3748; }
+
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .card-name { width: 140px; }
+  .graphs { grid-template-columns: 1fr 1fr; }
+}

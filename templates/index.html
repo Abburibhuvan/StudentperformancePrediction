@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Performance Prediction</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <span class="logo">🎓</span>
+      <div>
+        <h1>Student Performance Prediction</h1>
+        <p>ML-powered academic performance classifier using engagement &amp; attendance features</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Description -->
+    <section class="section description">
+      <p>
+        This system predicts student academic performance (High, Medium, or Low) using machine learning models
+        trained on real student engagement data. It analyses class participation, resource usage, discussion
+        involvement, and attendance to generate a prediction.
+      </p>
+    </section>
+
+    <!-- Model Accuracy Cards -->
+    <section class="section">
+      <h2>Model Accuracies</h2>
+      <div class="cards">
+        {% for name, acc in accuracies.items() %}
+        <div class="card {% if name == 'MLP Neural Network' %}best-model{% endif %}">
+          <div class="card-name">
+            {{ name }}
+            {% if name == 'MLP Neural Network' %}<span class="best-badge">★ Best</span>{% endif %}
+          </div>
+          <div class="bar-wrap">
+            <div class="bar" style="width: {{ acc }}%"></div>
+          </div>
+          <div class="card-acc">{{ acc }}%</div>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="best-note">★ Best Model: <strong>MLP Neural Network</strong> — Accuracy: <strong>70.6%</strong></p>
+    </section>
+
+    <!-- Graphs -->
+    <section class="section">
+      <h2>Data Visualisations</h2>
+      <div class="graphs">
+        <div class="graph-item">
+          <img src="/static/../output_heatmap.png" alt="Correlation Heatmap" onerror="this.parentElement.style.display='none'"/>
+          <p>Correlation Heatmap</p>
+        </div>
+        {% for i in range(1, 10) %}
+        <div class="graph-item">
+          <img src="/output_graph_{{ i }}.png" alt="Graph {{ i }}" onerror="this.parentElement.style.display='none'"/>
+          <p>Graph {{ i }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Prediction Form -->
+    <section class="section">
+      <h2>Predict Student Performance</h2>
+      <p class="form-desc">Fill in the student engagement details below to get a performance prediction from all models.</p>
+      <form id="predForm" novalidate>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="raisedhands">Class Participation (Raised Hands) <span>(0 – 100)</span></label>
+            <input type="number" id="raisedhands" min="0" max="100" placeholder="e.g. 45" required />
+            <span class="err" id="err-raisedhands"></span>
+          </div>
+          <div class="form-group">
+            <label for="visited_resources">Study Resource Usage <span>(0 – 100)</span></label>
+            <input type="number" id="visited_resources" min="0" max="100" placeholder="e.g. 60" required />
+            <span class="err" id="err-visited_resources"></span>
+          </div>
+          <div class="form-group">
+            <label for="discussion">Discussion Participation <span>(0 – 100)</span></label>
+            <input type="number" id="discussion" min="0" max="100" placeholder="e.g. 30" required />
+            <span class="err" id="err-discussion"></span>
+          </div>
+          <div class="form-group">
+            <label for="absence">Attendance Level</label>
+            <select id="absence" required>
+              <option value="">-- Select --</option>
+              <option value="1">Good (Under 7 absences)</option>
+              <option value="0">Poor (Above 7 absences)</option>
+            </select>
+            <span class="err" id="err-absence"></span>
+          </div>
+        </div>
+        <button type="submit" id="predictBtn">Predict Performance</button>
+      </form>
+    </section>
+
+    <!-- Results -->
+    <section class="section" id="resultsSection" style="display:none">
+      <h2>Prediction Results</h2>
+      <div class="results" id="results"></div>
+      <div class="final-prediction" id="finalPrediction"></div>
+      <button class="download-btn" id="downloadBtn">⬇ Download Result</button>
+    </section>
+
+  </main>
+
+  <footer>
+    <p><strong>Student Performance Prediction</strong></p>
+    <p>Bhuvan Abburi &nbsp;|&nbsp; Artificial Intelligence &amp; Machine Learning</p>
+    <p>Built with Flask &amp; scikit-learn</p>
+  </footer>
+
+  <script>
+    function validate() {
+      let valid = true;
+      const numFields = ['raisedhands', 'visited_resources', 'discussion'];
+      numFields.forEach(id => {
+        const el = document.getElementById(id);
+        const err = document.getElementById('err-' + id);
+        const val = Number(el.value);
+        if (el.value === '' || isNaN(val) || val < 0 || val > 100) {
+          err.textContent = 'Please enter a value between 0 and 100.';
+          el.classList.add('invalid');
+          valid = false;
+        } else {
+          err.textContent = '';
+          el.classList.remove('invalid');
+        }
+      });
+      const absence = document.getElementById('absence');
+      const absErr  = document.getElementById('err-absence');
+      if (!absence.value) {
+        absErr.textContent = 'Please select an attendance level.';
+        absence.classList.add('invalid');
+        valid = false;
+      } else {
+        absErr.textContent = '';
+        absence.classList.remove('invalid');
+      }
+      return valid;
+    }
+
+    document.getElementById('predForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validate()) return;
+
+      const btn = document.getElementById('predictBtn');
+      btn.textContent = 'Predicting...';
+      btn.disabled = true;
+
+      const payload = {
+        raisedhands:       document.getElementById('raisedhands').value,
+        visited_resources: document.getElementById('visited_resources').value,
+        discussion:        document.getElementById('discussion').value,
+        absence:           document.getElementById('absence').value,
+      };
+
+      const res  = await fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      const colorMap = { 'High (H)': 'high', 'Medium (M)': 'medium', 'Low (L)': 'low' };
+      const container = document.getElementById('results');
+      container.innerHTML = Object.entries(data.predictions).map(([model, pred]) => `
+        <div class="result-card ${colorMap[pred] || ''} ${model === 'MLP Neural Network' ? 'best-result' : ''}">
+          <div class="result-model">${model}${model === 'MLP Neural Network' ? ' ★' : ''}</div>
+          <div class="result-acc">${data.accuracies[model]}%</div>
+          <div class="result-pred">${pred}</div>
+        </div>
+      `).join('');
+
+      const fp = document.getElementById('finalPrediction');
+      const finalClass = colorMap[data.final] || '';
+      fp.className = 'final-prediction ' + finalClass;
+      fp.innerHTML = `
+        <span class="final-label">Final Prediction</span>
+        <span class="final-value">${data.final}</span>
+        <span class="final-note">based on best model: MLP Neural Network</span>
+      `;
+
+      document.getElementById('resultsSection').style.display = 'block';
+      document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+      btn.textContent = 'Predict Performance';
+      btn.disabled = false;
+
+      // Download button
+      document.getElementById('downloadBtn').onclick = () => {
+        const lines = [
+          'Student Performance Prediction Result',
+          '======================================',
+          `Raised Hands: ${payload.raisedhands}`,
+          `Visited Resources: ${payload.visited_resources}`,
+          `Discussion: ${payload.discussion}`,
+          `Absence: ${document.getElementById('absence').options[document.getElementById('absence').selectedIndex].text}`,
+          '',
+          'Model Predictions:',
+          ...Object.entries(data.predictions).map(([m, p]) => `  ${m}: ${p}`),
+          '',
+          `Final Prediction (MLP): ${data.final}`,
+        ];
+        const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'prediction_result.txt';
+        a.click();
+      };
+    });
+  </script>
+</body>
+</html>
